@@ -1,28 +1,31 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   LiveKitRoom,
   RoomAudioRenderer,
   ControlBar,
   useDataChannel,
+  useRoomContext,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
 
 const ROOM_NAME = 'consult-1';
 
 type CallState = 'idle' | 'connecting' | 'in-call';
+type Lang = 'en' | 'hi' | 'bn';
 
 export default function Home() {
   const [state, setState] = useState<CallState>('idle');
   const [token, setToken] = useState<string>();
   const [error, setError] = useState<string>('');
+  const [lang, setLang] = useState<Lang>('en'); // default English
 
   const start = async () => {
     try {
       setError('');
       setState('connecting');
-      const id = 'web-' + Math.random().toString(36).slice(2);
+      const id = `web-${Math.random().toString(36).slice(2)}`;
       const res = await fetch(`/api/token?room=${ROOM_NAME}&identity=${id}`);
       if (!res.ok) throw new Error(`Token HTTP ${res.status}`);
       const data = await res.json();
@@ -38,11 +41,26 @@ export default function Home() {
   if (state !== 'in-call') {
     return (
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', fontFamily: 'ui-sans-serif' }}>
-        <div style={{ textAlign: 'center', maxWidth: 560 }}>
-          <div style={{ fontSize: 20, opacity: .85, marginBottom: 10 }}>
-            {/* Updated heading */}
-            Chat live with your AI Immigration Agent
+        <div style={{ textAlign: 'center', maxWidth: 600 }}>
+          <div style={{ fontSize: 20, opacity: .85, marginBottom: 16 }}>
+            {/* headline (custom text) */}
+            Chat live with your AI Immigrantion Agent
           </div>
+
+          {/* Language selector */}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ marginRight: 8, opacity:.7 }}>Language:</label>
+            <select
+              value={lang}
+              onChange={(e) => setLang(e.target.value as Lang)}
+              style={{ padding: '8px 12px', borderRadius: 8 }}
+            >
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="bn">Bengali</option>
+            </select>
+          </div>
+
           <button
             onClick={start}
             style={{
@@ -51,10 +69,13 @@ export default function Home() {
             }}>
             START CALL
           </button>
+
           {state === 'connecting' && <div style={{ marginTop: 12, opacity: .7 }}>Connecting…</div>}
           {error && <div style={{ marginTop: 12, color: '#c00' }}>{error}</div>}
-          {/* Updated footer/credit */}
-          <div style={{ marginTop: 18, fontSize: 12, opacity: .6 }}>Powered by VS-AI</div>
+
+          <div style={{ marginTop: 18, fontSize: 12, opacity: .6 }}>
+            Powered by VS-AI
+          </div>
         </div>
       </div>
     );
@@ -70,11 +91,34 @@ export default function Home() {
       data-lk-theme="default"
       style={{ height: '100vh', background: '#0b0b0b', color: '#fff' }}
     >
+      {/* Send language to agent when connected / changed */}
+      <LangSender lang={lang} />
+
       <Layout />
       <RoomAudioRenderer />
       <ControlBar controls={{ screenShare: true, camera: false }} />
     </LiveKitRoom>
   );
+}
+
+/* ------------------- Send selected language to agent ------------------- */
+
+function LangSender({ lang }: { lang: 'en' | 'hi' | 'bn' }) {
+  const room = useRoomContext();
+  useEffect(() => {
+    if (!room) return;
+    // small delay to ensure data channel is ready
+    const t = setTimeout(() => {
+      try {
+        room.localParticipant.publishData(
+          new TextEncoder().encode(lang),
+          { topic: 'lang' }
+        );
+      } catch {}
+    }, 300);
+    return () => clearTimeout(t);
+  }, [room, lang]);
+  return null;
 }
 
 /* ------------------- Layout + Panels ------------------- */
@@ -114,6 +158,7 @@ function WavePanel() {
 
 function RightPanel() {
   const config = useMemo(() => ({
+    DOMAIN: 'UK Immigration only',
     VAD: 'SILERO',
     STT: 'GROQ / Deepgram',
     LLM: 'GROQ ' + (process.env.NEXT_PUBLIC_MODEL ?? 'llama3-70b-8192'),
@@ -135,7 +180,7 @@ function RightPanel() {
   return (
     <div style={{ padding: '16px 16px 0', borderLeft: '1px solid #222', background: '#0c0c0c' }}>
       <h3 style={{ margin: '8px 0 12px 0' }}>AGENT CONFIGURATION</h3>
-      <dl style={{ fontSize: 13, opacity: .9, display: 'grid', gridTemplateColumns: '120px 1fr', rowGap: 8 }}>
+      <dl style={{ fontSize: 13, opacity: .9, display: 'grid', gridTemplateColumns: '140px 1fr', rowGap: 8 }}>
         {Object.entries(config).map(([k, v]) => (
           <div key={k} style={{ display: 'contents' }}>
             <dt style={{ opacity: .6 }}>{k}</dt><dd>{String(v)}</dd>
