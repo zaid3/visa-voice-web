@@ -38,9 +38,10 @@ export default function Home() {
   if (state !== 'in-call') {
     return (
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', fontFamily: 'ui-sans-serif' }}>
-        <div style={{ textAlign: 'center', maxWidth: 520 }}>
-          <div style={{ fontSize: 18, opacity: .7, marginBottom: 8 }}>
-            Chat live with your voice AI agent
+        <div style={{ textAlign: 'center', maxWidth: 560 }}>
+          <div style={{ fontSize: 20, opacity: .85, marginBottom: 10 }}>
+            {/* Updated heading */}
+            Chat live with your AI Immigration Agent
           </div>
           <button
             onClick={start}
@@ -52,7 +53,8 @@ export default function Home() {
           </button>
           {state === 'connecting' && <div style={{ marginTop: 12, opacity: .7 }}>Connecting…</div>}
           {error && <div style={{ marginTop: 12, color: '#c00' }}>{error}</div>}
-          <div style={{ marginTop: 18, fontSize: 12, opacity: .6 }}>Built with LiveKit Agents</div>
+          {/* Updated footer/credit */}
+          <div style={{ marginTop: 18, fontSize: 12, opacity: .6 }}>Powered by VS-AI</div>
         </div>
       </div>
     );
@@ -122,7 +124,7 @@ function RightPanel() {
 
   const [transcript, setTranscript] = useState<string[]>([]);
 
-  // ✅ Correct API: useDataChannel(topic?, onMessage?)
+  // Listen for transcript messages sent on the "transcript" topic
   useDataChannel('transcript', (msg) => {
     try {
       const text = new TextDecoder().decode(msg.payload);
