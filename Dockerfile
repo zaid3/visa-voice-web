@@ -1,8 +1,9 @@
 FROM node:20-alpine
 WORKDIR /app
+COPY package.json ./
+RUN npm install --omit=dev
 COPY . .
-RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install && pnpm build
+RUN npm run build
 ENV PORT=3000
 EXPOSE 3000
-CMD ["pnpm","start","--","-p","3000"]
+CMD ["npm","run","start","--","-p","3000"]
