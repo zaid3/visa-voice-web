@@ -1,9 +1,18 @@
-"dependencies": {
-  "@livekit/components-react": "1.8.4",
-  "@livekit/components-styles": "1.1.6",
-  "livekit-client": "^2",
-  "livekit-server-sdk": "^2",
-  "next": "14",
-  "react": "18",
-  "react-dom": "18"
+{
+  "name": "visa-voice-web",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000"
+  },
+  "dependencies": {
+    "@livekit/components-react": "1.8.4",
+    "@livekit/components-styles": "1.1.6",
+    "livekit-client": "^2",
+    "livekit-server-sdk": "^2",
+    "next": "14",
+    "react": "18",
+    "react-dom": "18"
+  }
 }
