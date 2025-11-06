@@ -1,0 +1,14 @@
+{
+  "name": "visa-voice-web",
+  "private": true,
+  "scripts": { "dev": "next dev -p 3000", "build": "next build", "start": "next start -p 3000" },
+  "dependencies": {
+    "@livekit/components-react": "^2",
+    "@livekit/components-styles": "^2",
+    "livekit-client": "^2",
+    "livekit-server-sdk": "^2",
+    "next": "14",
+    "react": "18",
+    "react-dom": "18"
+  }
+}
