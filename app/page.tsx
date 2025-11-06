@@ -111,15 +111,14 @@ function RightPanel() {
   }), []);
 
   const [transcript, setTranscript] = useState<string[]>([]);
-  // Listen for incoming data messages for demo transcript (your agent can send JSON on data channel)
-  useDataChannel({
-    onData: ({ payload }) => {
-      try {
-        const text = new TextDecoder().decode(payload);
-        setTranscript(prev => [...prev, text].slice(-100));
-      } catch {}
-    }
-  });
+  // Listen for transcript messages sent on the "transcript" topic
+useDataChannel("transcript", (msg) => {
+  try {
+    const text = new TextDecoder().decode(msg.payload);
+    setTranscript((prev) => [...prev, text].slice(-100));
+  } catch {}
+});
+
 
   return (
     <div style={{padding:'16px 16px 0',borderLeft:'1px solid #222',background:'#0c0c0c'}}>
