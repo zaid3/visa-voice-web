@@ -9,6 +9,7 @@ import {
   useRoomContext,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
+import { DataPacket_Kind } from 'livekit-client'; // ✅ add this
 
 const ROOM_NAME = 'consult-1';
 
@@ -43,8 +44,7 @@ export default function Home() {
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', fontFamily: 'ui-sans-serif' }}>
         <div style={{ textAlign: 'center', maxWidth: 600 }}>
           <div style={{ fontSize: 20, opacity: .85, marginBottom: 16 }}>
-            {/* headline (custom text) */}
-            Chat live with your AI Immigrantion Agent
+            Chat live with your AI Immigrant Agent
           </div>
 
           {/* Language selector */}
@@ -91,9 +91,7 @@ export default function Home() {
       data-lk-theme="default"
       style={{ height: '100vh', background: '#0b0b0b', color: '#fff' }}
     >
-      {/* Send language to agent when connected / changed */}
       <LangSender lang={lang} />
-
       <Layout />
       <RoomAudioRenderer />
       <ControlBar controls={{ screenShare: true, camera: false }} />
@@ -107,12 +105,12 @@ function LangSender({ lang }: { lang: 'en' | 'hi' | 'bn' }) {
   const room = useRoomContext();
   useEffect(() => {
     if (!room) return;
-    // small delay to ensure data channel is ready
     const t = setTimeout(() => {
       try {
         room.localParticipant.publishData(
           new TextEncoder().encode(lang),
-          { topic: 'lang' }
+          DataPacket_Kind.RELIABLE,            // ✅ required 2nd arg
+          { topic: 'lang' }                    // ✅ topic stays here
         );
       } catch {}
     }, 300);
@@ -169,12 +167,11 @@ function RightPanel() {
 
   const [transcript, setTranscript] = useState<string[]>([]);
 
-  // Listen for transcript messages sent on the "transcript" topic
   useDataChannel('transcript', (msg) => {
     try {
       const text = new TextDecoder().decode(msg.payload);
       setTranscript((prev) => [...prev, text].slice(-100));
-    } catch { /* no-op */ }
+    } catch {}
   });
 
   return (
